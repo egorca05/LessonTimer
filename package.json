@@ -1,0 +1,58 @@
+{
+  "name": "lesson-timer",
+  "productName": "LessonTimer",
+  "version": "2.1.0",
+  "description": "Недельное расписание, звонки и плавающий таймер уроков для Windows и macOS.",
+  "main": "src/main/index.cjs",
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "LessonTimer contributors",
+  "keywords": [
+    "electron",
+    "education",
+    "schedule",
+    "countdown",
+    "windows",
+    "macos"
+  ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/unit/*.test.js",
+    "test:ui": "playwright test",
+    "check": "node scripts/check-project.cjs",
+    "screenshots": "node scripts/screenshots.cjs",
+    "build:win": "electron-builder --win --x64 --publish never",
+    "build:mac": "electron-builder --mac --arm64 --publish never",
+    "build:mac:intel": "electron-builder --mac --x64 --publish never",
+    "pack:win": "electron-builder --win --x64 --dir --publish never",
+    "pack:mac": "electron-builder --mac --arm64 --dir --publish never",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "electron": "45.3.2",
+    "electron-builder": "26.18.0",
+    "prettier": "3.10.1",
+    "yaml": "2.9.1"
+  },
+  "overrides": {
+    "app-builder-lib": {
+      "minimatch": "^11.0.1"
+    },
+    "@electron/universal": {
+      "minimatch": "^11.0.1"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egorca05/LessonTimer---.git"
+  },
+  "homepage": "https://github.com/egorca05/LessonTimer---#readme",
+  "bugs": {
+    "url": "https://github.com/egorca05/LessonTimer---/issues"
+  }
+}

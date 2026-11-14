@@ -1,0 +1,25 @@
+name: Ошибка
+description: Сообщить о неправильной работе приложения
+title: '[Ошибка] '
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия LessonTimer
+      placeholder: Например, 2.1.0
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Система и масштаб экрана
+      placeholder: Например, Windows 11 x64, 125% / macOS 15, M1
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как повторить
+      description: Опишите действия, ожидаемый и фактический результат. Можно приложить скриншот без личных данных.
+    validations:
+      required: true

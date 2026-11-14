@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' data:; connect-src 'none'"
+    />
+    <title>Таймер уроков</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="brand-icon">◷</div>
+          <div>
+            <h1>Таймер уроков</h1>
+            <p>Всё по своему расписанию</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <span id="save-status" class="save-status">Все изменения сохранены</span
+          ><button id="save" class="secondary">Сохранить</button>
+        </div>
+      </header>
+      <main>
+        <section class="schedule-section">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">ВАША НЕДЕЛЯ</span>
+              <h2>Расписание занятий</h2>
+            </div>
+            <div class="small-actions">
+              <button id="import" class="text-button">Открыть файл</button
+              ><button id="export" class="text-button">Экспорт</button>
+            </div>
+          </div>
+          <nav id="days" class="days" aria-label="Дни недели"></nav>
+          <div class="day-header">
+            <div>
+              <h3 id="day-title"></h3>
+              <span id="day-summary" class="muted"></span>
+            </div>
+            <div class="copy-group">
+              <label for="copy-to">Копировать в</label
+              ><select id="copy-to" aria-label="Куда скопировать расписание">
+                <option value="">Выбрать день</option></select
+              ><button
+                id="copy"
+                class="icon-button"
+                title="Скопировать расписание"
+                aria-label="Скопировать расписание"
+              >
+                →
+              </button>
+            </div>
+          </div>
+          <div class="table-head">
+            <span>НАЧАЛО</span><span>КОНЕЦ</span><span>ЗАНЯТИЕ</span><span></span>
+          </div>
+          <div id="lessons" class="lessons"></div>
+          <div id="empty" class="empty" hidden>
+            <div>☀</div>
+            <h3>День без занятий</h3>
+            <p>Добавьте урок или скопируйте расписание другого дня.</p>
+          </div>
+          <button id="add" class="add-button">＋ Добавить занятие</button>
+          <p class="hint">Перемены появятся автоматически между занятиями.</p>
+        </section>
+        <section class="settings-grid">
+          <div class="settings-card">
+            <span class="eyebrow">ЗВУК</span>
+            <div class="card-title">
+              <h3>Звонки</h3>
+              <label class="switch"
+                ><input
+                  id="sound-enabled"
+                  type="checkbox"
+                  aria-label="Включить звуковые сигналы" /><span></span
+              ></label>
+            </div>
+            <div class="sound-row">
+              <label for="start-sound">Начало урока</label
+              ><select id="start-sound"></select
+              ><button
+                id="test-start"
+                class="icon-button"
+                title="Послушать начало"
+                aria-label="Послушать начало"
+              >
+                ▷
+              </button>
+            </div>
+            <div class="sound-row">
+              <label for="end-sound">Конец урока</label
+              ><select id="end-sound"></select
+              ><button
+                id="test-end"
+                class="icon-button"
+                title="Послушать конец"
+                aria-label="Послушать конец"
+              >
+                ▷
+              </button>
+            </div>
+            <div class="volume-row">
+              <label for="volume">Громкость</label
+              ><input id="volume" type="range" min="0" max="100" /><span id="volume-label"></span>
+            </div>
+            <button id="custom-sound" class="text-button upload">＋ Выбрать свой звук</button
+            ><span id="custom-name" class="file-name">WAV, MP3 или OGG · до 10 МБ</span>
+          </div>
+          <div class="settings-card">
+            <span class="eyebrow">ОКНО ТАЙМЕРА</span>
+            <h3>Маленькое. Всегда рядом.</h3>
+            <div class="option-row">
+              <label for="mode">Расписание</label
+              ><select id="mode">
+                <option value="calendar">По дню недели</option>
+                <option value="manual">Выбранный день</option>
+              </select>
+            </div>
+            <p id="mode-hint" class="hint"></p>
+            <div class="option-row">
+              <label for="compact">Компактный вид</label
+              ><label class="switch"><input id="compact" type="checkbox" /><span></span></label>
+            </div>
+            <div class="volume-row">
+              <label for="opacity">Непрозрачность</label
+              ><input id="opacity" type="range" min="55" max="100" /><span
+                id="opacity-label"
+              ></span>
+            </div>
+            <p class="hint">Перетащите окно мышью. Кнопка ⚙ вернёт в настройки.</p>
+          </div>
+        </section>
+      </main>
+      <footer>
+        <div><span class="footer-dot"></span><span id="launch-info"></span></div>
+        <button id="launch" class="primary">Запустить таймер <span>→</span></button>
+      </footer>
+      <div id="toast" role="status" hidden></div>
+      <dialog id="confirm">
+        <h3 id="confirm-title"></h3>
+        <p id="confirm-text"></p>
+        <div class="dialog-actions">
+          <button id="cancel-confirm" class="secondary">Отмена</button
+          ><button id="accept-confirm" class="primary">Продолжить</button>
+        </div>
+      </dialog>
+    </div>
+    <script src="../../shared/schedule.js"></script>
+    <script src="../../shared/time-input.js"></script>
+    <script src="editor.js"></script>
+  </body>
+</html>

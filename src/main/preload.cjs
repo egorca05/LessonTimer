@@ -1,0 +1,17 @@
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('timer', {
+  get: () => ipcRenderer.invoke('config:get'),
+  save: (data) => ipcRenderer.invoke('config:save', data),
+  start: (data) => ipcRenderer.invoke('timer:start', data),
+  editor: () => ipcRenderer.invoke('window:editor'),
+  closeWidget: () => ipcRenderer.invoke('window:close-widget'),
+  compact: () => ipcRenderer.invoke('widget:compact'),
+  dirty: (value) => ipcRenderer.send('editor:dirty', Boolean(value)),
+  importSound: () => ipcRenderer.invoke('sound:import'),
+  previewSound: (key) => ipcRenderer.invoke('sound:preview', key),
+  export: () => ipcRenderer.invoke('config:export'),
+  import: () => ipcRenderer.invoke('config:import'),
+  onState: (fn) => ipcRenderer.on('timer:state', (_, data) => fn(data)),
+  onConfig: (fn) => ipcRenderer.on('config:changed', (_, data) => fn(data)),
+  onSound: (fn) => ipcRenderer.on('sound:play', (_, data) => fn(data)),
+});

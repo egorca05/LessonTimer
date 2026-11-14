@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; media-src 'self' data:; connect-src 'none'"
+    />
+    <title>Таймер</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="widget" class="widget">
+      <div class="top">
+        <span class="dot"></span><span id="title">Таймер уроков</span>
+        <div class="controls">
+          <button id="compact" title="Компактный вид" aria-label="Компактный вид">−</button
+          ><button id="settings" title="Расписание и настройки" aria-label="Расписание и настройки">
+            ⚙</button
+          ><button id="close" title="Закрыть таймер и открыть меню" aria-label="Закрыть таймер">
+            ×
+          </button>
+        </div>
+      </div>
+      <div id="caption" class="caption"></div>
+      <div id="countdown" class="countdown">00:00</div>
+      <div id="detail" class="detail"></div>
+      <div class="bottom"><span id="day"></span><span id="mode"></span></div>
+      <progress id="progress" max="1" value="0"></progress>
+    </div>
+    <script src="../../shared/schedule.js"></script>
+    <script src="widget.js"></script>
+  </body>
+</html>

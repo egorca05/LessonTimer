@@ -1,0 +1,59 @@
+appId: local.lessontimer.desktop
+productName: LessonTimer
+copyright: Copyright © 2026 LessonTimer contributors
+asar: true
+afterPack: build/after-pack.cjs
+npmRebuild: false
+directories:
+  output: dist
+  buildResources: build
+files:
+  - src/**/*
+  - assets/**/*
+  - package.json
+  - LICENSE
+artifactName: LessonTimer-${version}-${os}-${arch}.${ext}
+win:
+  icon: assets/icons/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: LessonTimer
+  deleteAppDataOnUninstall: false
+  installerIcon: assets/icons/icon.ico
+  uninstallerIcon: assets/icons/icon.ico
+  installerLanguages: [ru_RU, en_US]
+mac:
+  icon: assets/icons/icon.icns
+  category: public.app-category.education
+  minimumSystemVersion: '13.0'
+  identity: '-'
+  timestamp: 'none'
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  target:
+    - dmg
+    - zip
+dmg:
+  title: LessonTimer
+  icon: assets/icons/icon.icns
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 140
+      y: 165
+    - x: 400
+      y: 165
+      type: link
+      path: /Applications
+publish: null
