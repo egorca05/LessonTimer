@@ -35,6 +35,40 @@ async function openEditor(page, config = editorConfig()) {
       },
       dirty() {},
       onConfig() {},
+      updateInfo: async () => ({
+        ok: true,
+        value: {
+          phase: 'idle',
+          currentVersion: '2.2.0',
+          message: 'Обновления ещё не проверялись.',
+        },
+      }),
+      onUpdate: (fn) => {
+        window.__pushUpdate = fn;
+      },
+      checkUpdates: async () => ({
+        ok: true,
+        value: {
+          phase: 'available',
+          currentVersion: '2.2.0',
+          latestVersion: '2.3.0',
+          canInstall: true,
+          message: 'Доступна версия 2.3.0.',
+        },
+      }),
+      installUpdate: async () => {
+        window.__updateRequested = true;
+        return {
+          ok: true,
+          value: {
+            phase: 'installing',
+            currentVersion: '2.2.0',
+            message: 'Устанавливаем обновление…',
+          },
+        };
+      },
+      cancelUpdate: async () => ({ ok: true }),
+      openReleases: async () => ({ ok: true }),
       importSound: async () => ({ ok: true, value: { name: 'Мой звонок.wav' } }),
       previewSound: async () => ({ ok: true, value: null }),
       export: async () => ({ ok: true, value: true }),
@@ -71,7 +105,7 @@ async function openWidget(page, kind = 'lesson', compact = false) {
   await page.addInitScript(
     ({ state, compact }) => {
       window.timer = {
-        get: async () => ({ ok: true, value: { compact } }),
+        get: async () => ({ ok: true, value: { compact, theme: 'dark', accentColor: '#a1edc6' } }),
         onState: (fn) => queueMicrotask(() => fn(state)),
         onConfig() {},
         onSound() {},

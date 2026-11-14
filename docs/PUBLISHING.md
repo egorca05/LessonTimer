@@ -4,7 +4,7 @@
 
 ## Оформление репозитория
 
-Репозиторий проекта: **[egorca05/LessonTimer---](https://github.com/egorca05/LessonTimer---)**.
+Репозиторий проекта: **[egorca05/LessonTimer](https://github.com/egorca05/LessonTimer)**.
 
 Описание для поля **About / Description**:
 
@@ -24,7 +24,7 @@ Topics: `electron`, `education`, `schedule`, `countdown`, `desktop-app`, `window
 git init -b main
 git add .
 git commit -m "Prepare LessonTimer 2.1.0 for public release"
-git remote add origin https://github.com/egorca05/LessonTimer---.git
+git remote add origin https://github.com/egorca05/LessonTimer.git
 git push -u origin main
 ```
 

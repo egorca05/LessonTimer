@@ -6,6 +6,7 @@ function render() {
   $('widget').classList.toggle('break', state.kind === 'break' || state.kind === 'waiting');
   $('widget').classList.toggle('idle', idle);
   $('title').textContent = state.title;
+  $('title').title = state.title;
   $('caption').textContent = state.caption;
   $('countdown').textContent = idle ? 'Хорошего дня!' : TimerCore.countdown(state);
   $('detail').textContent = state.detail;
@@ -18,6 +19,7 @@ function render() {
 }
 function settings(config) {
   document.body.classList.toggle('compact', config.compact);
+  Appearance.apply(config);
 }
 window.timer.onState((next) => {
   state = next;

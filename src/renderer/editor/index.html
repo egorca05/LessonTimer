@@ -9,6 +9,7 @@
     />
     <title>Таймер уроков</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../shared/appearance.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -70,70 +71,180 @@
           <p class="hint">Перемены появятся автоматически между занятиями.</p>
         </section>
         <section class="settings-grid">
-          <div class="settings-card">
-            <span class="eyebrow">ЗВУК</span>
-            <div class="card-title">
-              <h3>Звонки</h3>
-              <label class="switch"
-                ><input
-                  id="sound-enabled"
-                  type="checkbox"
-                  aria-label="Включить звуковые сигналы" /><span></span
-              ></label>
+          <nav class="settings-tabs" role="tablist" aria-label="Настройки">
+            <button
+              id="tab-window"
+              class="settings-tab"
+              role="tab"
+              data-settings="window"
+              aria-controls="panel-window"
+              aria-selected="true"
+            >
+              Окно
+            </button>
+            <button
+              id="tab-sound"
+              class="settings-tab"
+              role="tab"
+              data-settings="sound"
+              aria-controls="panel-sound"
+              aria-selected="false"
+            >
+              Звук
+            </button>
+            <button
+              id="tab-updates"
+              class="settings-tab"
+              role="tab"
+              data-settings="updates"
+              aria-controls="panel-updates"
+              aria-selected="false"
+            >
+              Обновления
+            </button>
+          </nav>
+          <div id="panel-window" class="settings-pane" role="tabpanel" aria-labelledby="tab-window">
+            <div class="settings-card">
+              <span class="eyebrow">ОКНО И ОФОРМЛЕНИЕ</span>
+              <h3>По вашему вкусу</h3>
+              <div class="option-row">
+                <label for="theme">Тема</label
+                ><select id="theme">
+                  <option value="dark">Тёмная</option>
+                  <option value="light">Светлая</option>
+                  <option value="system">Как в системе</option>
+                </select>
+              </div>
+              <div class="color-row">
+                <label for="accent-color">Акцентный цвет</label>
+                <div class="color-control">
+                  <input
+                    id="accent-color"
+                    type="color"
+                    value="#a1edc6"
+                    aria-label="Выбрать акцентный цвет"
+                  /><input
+                    id="accent-hex"
+                    class="color-hex"
+                    type="text"
+                    maxlength="7"
+                    value="#a1edc6"
+                    aria-label="Акцентный цвет HEX"
+                    spellcheck="false"
+                  />
+                </div>
+              </div>
+              <div id="color-presets" class="color-presets" aria-label="Готовые цвета"></div>
+              <div class="option-row">
+                <label for="mode">Расписание</label
+                ><select id="mode">
+                  <option value="calendar">По дню недели</option>
+                  <option value="manual">Выбранный день</option>
+                </select>
+              </div>
+              <p id="mode-hint" class="hint"></p>
+              <div class="option-row">
+                <label for="compact">Мини-режим</label
+                ><label class="switch"><input id="compact" type="checkbox" /><span></span></label>
+              </div>
+              <div class="volume-row">
+                <label for="opacity">Непрозрачность</label
+                ><input id="opacity" type="range" min="55" max="100" /><span
+                  id="opacity-label"
+                ></span>
+              </div>
+              <p class="hint">
+                Мини-окно занимает всего 270 × 84. Перетаскивайте его за название или свободное
+                место.
+              </p>
             </div>
-            <div class="sound-row">
-              <label for="start-sound">Начало урока</label
-              ><select id="start-sound"></select
-              ><button
-                id="test-start"
-                class="icon-button"
-                title="Послушать начало"
-                aria-label="Послушать начало"
-              >
-                ▷
-              </button>
-            </div>
-            <div class="sound-row">
-              <label for="end-sound">Конец урока</label
-              ><select id="end-sound"></select
-              ><button
-                id="test-end"
-                class="icon-button"
-                title="Послушать конец"
-                aria-label="Послушать конец"
-              >
-                ▷
-              </button>
-            </div>
-            <div class="volume-row">
-              <label for="volume">Громкость</label
-              ><input id="volume" type="range" min="0" max="100" /><span id="volume-label"></span>
-            </div>
-            <button id="custom-sound" class="text-button upload">＋ Выбрать свой звук</button
-            ><span id="custom-name" class="file-name">WAV, MP3 или OGG · до 10 МБ</span>
           </div>
-          <div class="settings-card">
-            <span class="eyebrow">ОКНО ТАЙМЕРА</span>
-            <h3>Маленькое. Всегда рядом.</h3>
-            <div class="option-row">
-              <label for="mode">Расписание</label
-              ><select id="mode">
-                <option value="calendar">По дню недели</option>
-                <option value="manual">Выбранный день</option>
-              </select>
+          <div
+            id="panel-sound"
+            class="settings-pane"
+            role="tabpanel"
+            aria-labelledby="tab-sound"
+            hidden
+          >
+            <div class="settings-card">
+              <span class="eyebrow">ЗВУК</span>
+              <div class="card-title">
+                <h3>Звонки</h3>
+                <label class="switch"
+                  ><input
+                    id="sound-enabled"
+                    type="checkbox"
+                    aria-label="Включить звуковые сигналы" /><span></span
+                ></label>
+              </div>
+              <div class="sound-row">
+                <label for="start-sound">Начало урока</label
+                ><select id="start-sound"></select
+                ><button
+                  id="test-start"
+                  class="icon-button"
+                  title="Послушать начало"
+                  aria-label="Послушать начало"
+                >
+                  ▷
+                </button>
+              </div>
+              <div class="sound-row">
+                <label for="end-sound">Конец урока</label
+                ><select id="end-sound"></select
+                ><button
+                  id="test-end"
+                  class="icon-button"
+                  title="Послушать конец"
+                  aria-label="Послушать конец"
+                >
+                  ▷
+                </button>
+              </div>
+              <div class="volume-row">
+                <label for="volume">Громкость</label
+                ><input id="volume" type="range" min="0" max="100" /><span id="volume-label"></span>
+              </div>
+              <button id="custom-sound" class="text-button upload">＋ Выбрать свой звук</button
+              ><span id="custom-name" class="file-name">WAV, MP3 или OGG · до 10 МБ</span>
             </div>
-            <p id="mode-hint" class="hint"></p>
-            <div class="option-row">
-              <label for="compact">Компактный вид</label
-              ><label class="switch"><input id="compact" type="checkbox" /><span></span></label>
+          </div>
+          <div
+            id="panel-updates"
+            class="settings-pane"
+            role="tabpanel"
+            aria-labelledby="tab-updates"
+            hidden
+          >
+            <div class="settings-card">
+              <span class="eyebrow">LESSONTIMER</span>
+              <h3>Обновления</h3>
+              <p id="update-version" class="update-version">Загрузка версии…</p>
+              <div class="option-row">
+                <label for="check-updates-startup">Проверять при запуске</label
+                ><label class="switch"
+                  ><input id="check-updates-startup" type="checkbox" /><span></span
+                ></label>
+              </div>
+              <p id="update-status" class="update-status" role="status">
+                Обновления ещё не проверялись.
+              </p>
+              <progress
+                id="update-progress"
+                class="update-progress"
+                max="100"
+                value="0"
+                hidden
+              ></progress>
+              <div class="update-actions">
+                <button id="check-updates" class="secondary">Проверить сейчас</button
+                ><button id="update-action" class="primary" hidden>Обновить</button
+                ><button id="update-cancel" class="secondary" hidden>Отменить</button>
+              </div>
+              <p class="hint">
+                Перед установкой приложение спросит разрешение. Расписание и настройки сохранятся.
+              </p>
             </div>
-            <div class="volume-row">
-              <label for="opacity">Непрозрачность</label
-              ><input id="opacity" type="range" min="55" max="100" /><span
-                id="opacity-label"
-              ></span>
-            </div>
-            <p class="hint">Перетащите окно мышью. Кнопка ⚙ вернёт в настройки.</p>
           </div>
         </section>
       </main>
@@ -152,6 +263,7 @@
       </dialog>
     </div>
     <script src="../../shared/schedule.js"></script>
+    <script src="../../shared/appearance.js"></script>
     <script src="../../shared/time-input.js"></script>
     <script src="editor.js"></script>
   </body>

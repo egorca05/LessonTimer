@@ -1,7 +1,7 @@
 {
   "name": "lesson-timer",
   "productName": "LessonTimer",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Недельное расписание, звонки и плавающий таймер уроков для Windows и macOS.",
   "main": "src/main/index.cjs",
   "type": "commonjs",
@@ -49,10 +49,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/egorca05/LessonTimer---.git"
+    "url": "git+https://github.com/egorca05/LessonTimer.git"
   },
-  "homepage": "https://github.com/egorca05/LessonTimer---#readme",
+  "homepage": "https://github.com/egorca05/LessonTimer#readme",
   "bugs": {
-    "url": "https://github.com/egorca05/LessonTimer---/issues"
+    "url": "https://github.com/egorca05/LessonTimer/issues"
   }
 }

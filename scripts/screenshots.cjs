@@ -15,6 +15,13 @@ async function capture(browser) {
     await editor.setViewportSize({ width: 1040, height: 820 });
     await openEditor(editor);
     await editor.screenshot({ path: path.join(out, 'editor.png') });
+    await editor.locator('#theme').selectOption('light');
+    await editor.locator('#accent-hex').fill('#4979e8');
+    await editor.locator('#accent-hex').press('Tab');
+    await editor.clock.runFor(300);
+    await editor.locator('#save').click();
+    await editor.locator('#toast').evaluate((el) => (el.hidden = true));
+    await editor.screenshot({ path: path.join(out, 'editor-light.png') });
     await editor.close();
     for (const [kind, compact, file] of [
       ['lesson', false, 'widget-lesson.png'],
@@ -22,12 +29,14 @@ async function capture(browser) {
       ['lesson', true, 'widget-compact.png'],
     ]) {
       const page = await context.newPage();
-      await page.setViewportSize({ width: 328, height: compact ? 136 : 188 });
+      await page.setViewportSize(
+        compact ? { width: 270, height: 84 } : { width: 328, height: 188 }
+      );
       await openWidget(page, kind, compact);
       await page.screenshot({ path: path.join(out, file), omitBackground: true });
       await page.close();
     }
-    console.log('Saved four screenshots of the real renderer with demonstration data.');
+    console.log('Saved five screenshots of the real renderer with demonstration data.');
   } finally {
     await context.close();
   }

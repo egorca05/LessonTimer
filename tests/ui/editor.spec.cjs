@@ -56,6 +56,7 @@ test('sound settings and manual day are included when starting timer', async ({ 
   await openEditor(page);
   await page.locator('#days button').nth(5).click();
   await page.locator('#mode').selectOption('manual');
+  await page.getByRole('tab', { name: 'Звук', exact: true }).click();
   await page.locator('#custom-sound').click();
   await expect(page.locator('#start-sound')).toHaveValue('custom');
   await page.locator('#launch').click();
@@ -74,7 +75,7 @@ test('editor has no horizontal overflow at minimum supported width', async ({ pa
 });
 for (const compact of [false, true])
   test('widget fits ' + (compact ? 'compact' : 'full') + ' viewport', async ({ page }) => {
-    await page.setViewportSize({ width: 328, height: compact ? 136 : 188 });
+    await page.setViewportSize(compact ? { width: 270, height: 84 } : { width: 328, height: 188 });
     await openWidget(page, 'lesson', compact);
     await expect(page.locator('#title')).toHaveText('Construct');
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(
@@ -82,3 +83,37 @@ for (const compact of [false, true])
     );
     await expect(page.locator('#detail'))[compact ? 'toBeHidden' : 'toBeVisible']();
   });
+
+test('appearance changes persist, including arbitrary palette colors and system theme', async ({
+  page,
+}) => {
+  await openEditor(page);
+  await page.locator('#theme').selectOption('light');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.locator('#accent-hex').fill('#123abc');
+  await page.locator('#accent-hex').press('Tab');
+  await page.locator('#save').click();
+  expect(
+    await page.evaluate(() => ({ theme: window.__saved.theme, color: window.__saved.accentColor }))
+  ).toEqual({ theme: 'light', color: '#123abc' });
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.locator('#theme').selectOption('system');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+test('updates show download progress and require explicit install action', async ({ page }) => {
+  await openEditor(page);
+  await page.getByRole('tab', { name: 'Обновления', exact: true }).click();
+  await page.locator('#check-updates').click();
+  await expect(page.locator('#update-status')).toContainText('2.3.0');
+  expect(await page.evaluate(() => window.__updateRequested)).toBeUndefined();
+  await page.locator('#update-action').click();
+  expect(await page.evaluate(() => window.__updateRequested)).toBe(true);
+  await page.evaluate(() =>
+    window.__pushUpdate({ phase: 'downloading', progress: 42, message: 'Скачиваем…' })
+  );
+  await expect(page.locator('#update-progress')).toBeVisible();
+  await expect(page.locator('#update-progress')).toHaveAttribute('value', '42');
+  await expect(page.locator('#update-cancel')).toBeVisible();
+});

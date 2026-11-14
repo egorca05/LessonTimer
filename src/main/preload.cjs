@@ -14,4 +14,10 @@ contextBridge.exposeInMainWorld('timer', {
   onState: (fn) => ipcRenderer.on('timer:state', (_, data) => fn(data)),
   onConfig: (fn) => ipcRenderer.on('config:changed', (_, data) => fn(data)),
   onSound: (fn) => ipcRenderer.on('sound:play', (_, data) => fn(data)),
+  updateInfo: () => ipcRenderer.invoke('updates:info'),
+  checkUpdates: () => ipcRenderer.invoke('updates:check'),
+  installUpdate: () => ipcRenderer.invoke('updates:install'),
+  cancelUpdate: () => ipcRenderer.invoke('updates:cancel'),
+  openReleases: () => ipcRenderer.invoke('updates:open'),
+  onUpdate: (fn) => ipcRenderer.on('updates:state', (_, data) => fn(data)),
 });

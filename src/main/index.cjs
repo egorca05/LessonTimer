@@ -7,10 +7,17 @@ const {
   Tray,
   nativeImage,
   screen,
+  net,
+  shell,
+  nativeTheme,
+  powerMonitor,
 } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const Core = require('../shared/schedule');
+const Layout = require('../shared/window-layout');
+const Overlay = require('./overlay.cjs');
+const { UpdateManager, RELEASES } = require('./updater.cjs');
 const ROOT = path.resolve(__dirname, '..', '..');
 app.setName('LessonTimer');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -22,6 +29,43 @@ let editor,
   ticker,
   quitting = false;
 let editorDirty = false;
+let updater, overlayWatcher;
+function windowBackground() {
+  return config?.theme === 'light' ||
+    (config?.theme === 'system' && nativeTheme?.shouldUseDarkColors === false)
+    ? '#f2f5f8'
+    : '#10151d';
+}
+function maintainOverlay() {
+  if (!widget || widget.isDestroyed()) return;
+  if (process.platform === 'darwin') {
+    if (widget.isVisibleOnAllWorkspaces && !widget.isVisibleOnAllWorkspaces())
+      Overlay.configure(widget);
+    widget.setAlwaysOnTop(true, 'screen-saver');
+    if (!widget.isVisible()) widget.showInactive();
+  }
+}
+function updateState(state) {
+  for (const win of [editor, widget])
+    if (win && !win.isDestroyed()) win.webContents.send('updates:state', state);
+}
+async function checkUpdates(manual = false) {
+  const state = await updater.check();
+  if (state.phase === 'available' && state.canInstall) {
+    const answer = await dialog.showMessageBox(editor, {
+      type: 'info',
+      title: 'Обновление LessonTimer',
+      message: 'Доступна новая версия ' + state.latestVersion,
+      detail:
+        'Скачать и установить обновление? Приложение перезапустится, расписание и настройки сохранятся.',
+      buttons: ['Обновить', 'Позже'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (answer.response === 0) await updater.install();
+  } else if (manual && state.phase === 'available') updateState(state);
+  return updater.snapshot();
+}
 function allowDiscard() {
   if (!editorDirty) return true;
   return (
@@ -45,14 +89,16 @@ function persist() {
   fs.renameSync(file + '.tmp', file);
 }
 function sendConfig() {
+  if (nativeTheme) nativeTheme.themeSource = config.theme;
+  if (editor && !editor.isDestroyed()) editor.setBackgroundColor?.(windowBackground());
   if (widget && !widget.isDestroyed()) {
-    const height = config.compact ? 136 : 188;
+    const { width, height } = Layout.size(config.compact);
     const [x, y] = widget.getPosition();
-    const position = keepInScreen({ x, y }, 328, height);
+    const position = keepInScreen({ x, y }, width, height);
     widget.setOpacity(config.opacity / 100);
     // setSize clamps a non-resizable Windows window to its previous minimum size.
     // setBounds updates the native bounds and the fixed-size constraints together.
-    widget.setBounds({ ...position, width: 328, height }, false);
+    widget.setBounds({ ...position, width, height }, false);
   }
   for (const win of [editor, widget])
     if (win && !win.isDestroyed()) win.webContents.send('config:changed', config);
@@ -101,7 +147,7 @@ function openEditor() {
     height: 820,
     minWidth: 860,
     minHeight: 660,
-    backgroundColor: '#10151d',
+    backgroundColor: windowBackground(),
     title: 'Таймер уроков',
     autoHideMenuBar: true,
     icon: path.join(ROOT, 'assets/icons/icon.png'),
@@ -109,6 +155,10 @@ function openEditor() {
   });
   lockNavigation(editor);
   editor.loadFile(path.join(ROOT, 'src/renderer/editor/index.html'));
+  editor.webContents.once('did-finish-load', () => {
+    updater?.acknowledge();
+    if (updater) updateState(updater.snapshot());
+  });
   editor.on('close', (e) => {
     if (!quitting && widget && !widget.isDestroyed() && widget.isVisible()) {
       e.preventDefault();
@@ -145,11 +195,11 @@ function showWidget() {
     tick();
     return;
   }
-  const height = config.compact ? 136 : 188,
-    pos = keepInScreen(config.widgetPosition, 328, height);
+  const { width, height } = Layout.size(config.compact),
+    pos = keepInScreen(config.widgetPosition, width, height);
   widget = new BrowserWindow({
     ...pos,
-    width: 328,
+    width,
     height,
     frame: false,
     resizable: false,
@@ -163,18 +213,23 @@ function showWidget() {
     show: false,
     title: 'Таймер уроков',
     webPreferences: prefs(),
+    ...Overlay.options(),
   });
-  widget.setAlwaysOnTop(true, 'floating');
+  Overlay.configure(widget);
   widget.setOpacity(config.opacity / 100);
-  if (process.platform === 'darwin')
-    widget.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   lockNavigation(widget);
   widget.loadFile(path.join(ROOT, 'src/renderer/widget/index.html'));
   widget.once('ready-to-show', () => {
-    widget.showInactive();
     if (editor) editor.hide();
+    Overlay.configure(widget);
+    widget.showInactive();
     previous = null;
     tick();
+  });
+  widget.on('show', () => Overlay.configure(widget));
+  widget.on('blur', () => {
+    if (widget && !widget.isDestroyed())
+      widget.setAlwaysOnTop(true, process.platform === 'darwin' ? 'screen-saver' : 'floating');
   });
   widget.on('moved', () => {
     const [x, y] = widget.getPosition();
@@ -243,6 +298,40 @@ else {
         fs.copyFileSync(dataPath(), dataPath() + '.backup-' + Date.now());
       config = Core.defaults();
     }
+    if (nativeTheme) nativeTheme.themeSource = config.theme;
+    updater = new UpdateManager({
+      app,
+      fetch: (url, options) => (net?.fetch ? net.fetch(url, options) : fetch(url, options)),
+      canQuit: allowDiscard,
+      quit: () => {
+        editorDirty = false;
+        quitting = true;
+        clearInterval(ticker);
+        clearInterval(overlayWatcher);
+        app.exit(0);
+      },
+    });
+    updater.on('state', updateState);
+    ipcMain.handle(
+      'updates:info',
+      wrap(() => updater.snapshot())
+    );
+    ipcMain.handle(
+      'updates:check',
+      wrap(() => checkUpdates(true))
+    );
+    ipcMain.handle(
+      'updates:install',
+      wrap(() => updater.install())
+    );
+    ipcMain.handle(
+      'updates:cancel',
+      wrap(() => updater.cancel())
+    );
+    ipcMain.handle(
+      'updates:open',
+      wrap(() => shell.openExternal(RELEASES))
+    );
     ipcMain.handle('config:get', () => ({ ok: true, value: config }));
     ipcMain.on('editor:dirty', (event, value) => {
       if (editor && event.sender === editor.webContents) editorDirty = Boolean(value);
@@ -382,14 +471,31 @@ else {
       Menu.buildFromTemplate([
         { label: 'Расписание и настройки', click: openEditor },
         { label: 'Показать таймер', click: showWidget },
+        {
+          label: 'Проверить обновления',
+          click: () => {
+            openEditor();
+            checkUpdates(true);
+          },
+        },
         { type: 'separator' },
         { label: 'Выход', click: () => app.quit() },
       ])
     );
     tray.on('double-click', openEditor);
     ticker = setInterval(tick, 250);
+    overlayWatcher = setInterval(maintainOverlay, 2000);
+    powerMonitor?.on('resume', maintainOverlay);
+    screen.on?.('display-metrics-changed', maintainOverlay);
     openEditor();
-    app.on('activate', openEditor);
+    if (app.isPackaged && config.checkUpdates) {
+      const timer = setTimeout(() => checkUpdates(false), 1600);
+      timer.unref?.();
+    }
+    app.on('activate', () => {
+      openEditor();
+      maintainOverlay();
+    });
   });
   app.on('before-quit', (event) => {
     if (!allowDiscard()) {
@@ -399,6 +505,8 @@ else {
     editorDirty = false;
     quitting = true;
     clearInterval(ticker);
+    clearInterval(overlayWatcher);
+    updater?.cancel();
   });
   app.on('window-all-closed', () => {
     if (!quitting) app.quit();

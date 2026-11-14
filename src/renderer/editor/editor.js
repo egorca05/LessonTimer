@@ -4,7 +4,9 @@ let config,
   selected = C.dayKey(new Date()),
   dirty = false,
   activeAudio,
-  toastTimer;
+  toastTimer,
+  settingsTab = 'window',
+  updateState;
 function toast(text, error = false) {
   clearTimeout(toastTimer);
   $('toast').textContent = text;
@@ -166,6 +168,37 @@ const soundNames = {
   custom: 'Свой файл',
   none: 'Без звука',
 };
+function selectSettings(tab) {
+  settingsTab = tab;
+  for (const name of ['window', 'sound', 'updates']) {
+    $('tab-' + name).setAttribute('aria-selected', String(name === tab));
+    $('panel-' + name).hidden = name !== tab;
+  }
+}
+function applyAccent(color) {
+  config.accentColor = Appearance.normalize(color);
+  $('accent-color').value = config.accentColor;
+  $('accent-hex').value = config.accentColor;
+  for (const button of $('color-presets').children)
+    button.setAttribute('aria-pressed', String(button.dataset.color === config.accentColor));
+  Appearance.apply(config);
+  mark();
+}
+function renderUpdate(state) {
+  if (!state) return;
+  updateState = state;
+  $('update-version').textContent = 'Версия ' + state.currentVersion;
+  $('update-status').textContent = state.message;
+  const busy = ['checking', 'downloading', 'verifying', 'installing'].includes(state.phase);
+  $('check-updates').disabled = busy;
+  $('update-progress').hidden = !['downloading', 'verifying'].includes(state.phase);
+  $('update-progress').value = state.progress || 0;
+  $('update-cancel').hidden = state.phase !== 'downloading';
+  $('update-action').hidden = !['available', 'ready'].includes(state.phase);
+  $('update-action').textContent = state.canInstall === false ? 'Открыть релиз' : 'Обновить';
+  if (['downloading', 'verifying', 'ready', 'installing'].includes(state.phase))
+    selectSettings('updates');
+}
 function renderSettings() {
   for (const [id, field] of [
     ['start-sound', 'startSound'],
@@ -179,6 +212,14 @@ function renderSettings() {
     }
     $(id).value = config[field];
   }
+  Appearance.apply(config);
+  $('theme').value = config.theme;
+  $('accent-color').value = config.accentColor;
+  $('accent-hex').value = config.accentColor;
+  for (const button of $('color-presets').children)
+    button.setAttribute('aria-pressed', String(button.dataset.color === config.accentColor));
+  $('check-updates-startup').checked = config.checkUpdates;
+  selectSettings(settingsTab);
   $('sound-enabled').checked = config.soundEnabled;
   $('volume').value = config.volume;
   $('volume-label').textContent = config.volume + '%';
@@ -243,6 +284,64 @@ async function init() {
   config = result.value;
   if (config.mode === 'manual') selected = config.manualDay;
   render();
+  for (const tab of document.querySelectorAll('[data-settings]'))
+    tab.onclick = () => selectSettings(tab.dataset.settings);
+  for (const [color, label] of [
+    ['#a1edc6', 'Мятный'],
+    ['#6da8ff', 'Синий'],
+    ['#b597ff', 'Фиолетовый'],
+    ['#ed8fba', 'Розовый'],
+    ['#f2af63', 'Оранжевый'],
+    ['#50c9c0', 'Бирюзовый'],
+  ]) {
+    const button = document.createElement('button');
+    button.className = 'color-preset';
+    button.type = 'button';
+    button.dataset.color = color;
+    button.style.setProperty('--preset', color);
+    button.setAttribute('aria-label', label);
+    button.setAttribute('aria-pressed', String(config.accentColor === color));
+    button.onclick = () => applyAccent(color);
+    $('color-presets').append(button);
+  }
+  $('theme').onchange = () => {
+    config.theme = $('theme').value;
+    Appearance.apply(config);
+    mark();
+  };
+  $('accent-color').oninput = () => applyAccent($('accent-color').value);
+  $('accent-hex').onchange = () => {
+    if (!/^#[0-9a-f]{6}$/i.test($('accent-hex').value)) {
+      toast('Введите цвет в формате #12AB34', true);
+      $('accent-hex').value = config.accentColor;
+      return;
+    }
+    applyAccent($('accent-hex').value);
+  };
+  $('check-updates-startup').onchange = () => {
+    config.checkUpdates = $('check-updates-startup').checked;
+    mark();
+  };
+  const requestUpdate = async (method) => {
+    try {
+      const result = await window.timer[method]();
+      if (!result.ok) throw new Error(result.error);
+      renderUpdate(result.value);
+    } catch (error) {
+      toast(error.message, true);
+    }
+  };
+  $('check-updates').onclick = () => requestUpdate('checkUpdates');
+  $('update-action').onclick = () =>
+    updateState?.canInstall === false
+      ? window.timer.openReleases()
+      : requestUpdate('installUpdate');
+  $('update-cancel').onclick = () => window.timer.cancelUpdate();
+  window.timer.onUpdate?.(renderUpdate);
+  if (window.timer.updateInfo) {
+    const info = await window.timer.updateInfo();
+    if (info.ok) renderUpdate(info.value);
+  }
   $('add').onclick = () => {
     let start = '13:00',
       end = '13:55';

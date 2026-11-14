@@ -9,15 +9,15 @@ body {
   margin: 0;
   background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #edf2f8;
+  color: var(--text);
   overflow: hidden;
   user-select: none;
 }
 .widget {
   height: 100vh;
-  border: 1px solid #394454;
+  border: 1px solid var(--line);
   border-radius: 16px;
-  background: #171e29;
+  background: var(--panel);
   padding: 14px 17px 13px;
   -webkit-app-region: drag;
 }
@@ -30,7 +30,7 @@ body {
 .dot {
   width: 6px;
   height: 6px;
-  background: var(--accent);
+  background: var(--status, var(--accent));
   border-radius: 50%;
   flex: none;
 }
@@ -54,17 +54,17 @@ body {
   background: transparent;
   border: 0;
   border-radius: 6px;
-  color: #9aa8ba;
+  color: var(--muted);
   cursor: pointer;
   font-size: 15px;
   line-height: 1;
 }
 .controls button:hover {
-  background: #303d4f;
-  color: #fff;
+  background: var(--surface-hover);
+  color: var(--text);
 }
 .caption {
-  color: #a4afbf;
+  color: var(--muted);
   font-size: 11px;
   margin-top: 11px;
 }
@@ -79,7 +79,7 @@ body {
 }
 .detail {
   font-size: 11px;
-  color: #c0cbd9;
+  color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -88,7 +88,7 @@ body {
 .bottom {
   display: flex;
   justify-content: space-between;
-  color: #8190a3;
+  color: var(--muted);
   font-size: 9px;
   margin-top: 10px;
 }
@@ -100,10 +100,10 @@ progress {
   border-radius: 4px;
   display: block;
   margin-top: 9px;
-  background: #303b4b;
+  background: var(--line);
 }
 progress::-webkit-progress-bar {
-  background: #303b4b;
+  background: var(--line);
   border-radius: 4px;
 }
 progress::-webkit-progress-value {
@@ -122,8 +122,46 @@ progress::-webkit-progress-value {
   letter-spacing: -0.4px;
 }
 .break {
-  --accent: #efc68b;
+  --status: var(--warning);
 }
 .idle {
-  --accent: #9db5cd;
+  --status: var(--muted);
+}
+
+.compact .widget {
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+.compact .top {
+  height: 20px;
+  gap: 6px;
+}
+.compact #title {
+  font-size: 12px;
+}
+.compact .controls button {
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+}
+.compact .countdown {
+  font-size: 32px;
+  line-height: 36px;
+  margin-top: 5px;
+  max-width: 145px;
+}
+.compact .caption {
+  position: absolute;
+  top: 43px;
+  right: 14px;
+  max-width: 86px;
+  margin: 0;
+  font-size: 9px;
+  line-height: 12px;
+  text-align: right;
+}
+.compact.idle .countdown {
+  font-size: 15px;
+  line-height: 30px;
+  letter-spacing: -0.2px;
 }

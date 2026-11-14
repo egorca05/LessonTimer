@@ -112,17 +112,17 @@ p {
   color: var(--muted);
 }
 .save-status.dirty {
-  color: #edc389;
+  color: var(--warning);
 }
 .secondary {
   padding: 10px 16px;
-  background: #222c3a;
-  border: 1px solid #364154;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
   border-radius: 9px;
 }
 .secondary:hover,
 .icon-button:hover {
-  background: #303c4e;
+  background: var(--surface-hover);
 }
 main {
   padding: 28px 36px 104px;
@@ -169,7 +169,7 @@ main {
   gap: 6px;
   align-items: flex-start;
   padding: 12px 10px;
-  background: #1a2230;
+  background: var(--tab);
   border: 1px solid transparent;
   border-radius: 11px;
   text-align: left;
@@ -184,7 +184,7 @@ main {
 }
 .day.active {
   background: var(--mint-dark);
-  border-color: #517c68;
+  border-color: var(--accent-line);
 }
 .day.active strong,
 .day.active span {
@@ -195,7 +195,7 @@ main {
   color: var(--mint);
 }
 .day:hover {
-  border-color: #4f665e;
+  border-color: var(--accent-line);
 }
 .day-header {
   display: flex;
@@ -221,7 +221,7 @@ select,
 input[type='time'],
 input[type='text'] {
   border: 1px solid var(--line);
-  background: #111823;
+  background: var(--input);
   color: var(--text);
   border-radius: 8px;
   padding: 9px 10px;
@@ -242,7 +242,7 @@ select {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #202937;
+  background: var(--surface-raised);
   font-size: 18px;
 }
 .table-head,
@@ -272,20 +272,20 @@ select {
   font-variant-numeric: tabular-nums;
 }
 .lesson .remove {
-  color: #9aa6b7;
+  color: var(--muted);
   background: transparent;
   border-color: transparent;
 }
 .lesson .remove:hover {
-  color: #ffaeae;
-  background: #432b34;
+  color: var(--danger);
+  background: var(--error-bg);
 }
 .break-row {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 1px 0;
-  color: #a9b3c2;
+  color: var(--muted);
   font-size: 10px;
   opacity: 0.8;
 }
@@ -293,17 +293,17 @@ select {
 .break-row:after {
   content: '';
   height: 1px;
-  background: #252e3d;
+  background: var(--line);
   flex: 1;
 }
 .add-button {
   margin-top: 14px;
   padding: 10px;
   width: 100%;
-  border: 1px dashed #3c4a5a;
+  border: 1px dashed var(--line);
   background: transparent;
   border-radius: 9px;
-  color: #bdccdc;
+  color: var(--muted);
   font-size: 12px;
 }
 .add-button:hover {
@@ -319,7 +319,7 @@ select {
 .empty {
   text-align: center;
   padding: 22px;
-  background: #141c27;
+  background: var(--input);
   border-radius: 10px;
 }
 .empty > div {
@@ -340,7 +340,7 @@ select {
 }
 .settings-card {
   background: var(--panel);
-  border: 1px solid #273142;
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 20px;
 }
@@ -362,7 +362,7 @@ select {
 .sound-row label,
 .option-row > label,
 .volume-row > label {
-  color: #b3bdcc;
+  color: var(--muted);
   font-size: 11px;
 }
 .sound-row select {
@@ -430,7 +430,7 @@ select {
   display: block;
   width: 32px;
   height: 19px;
-  background: #3d485a;
+  background: var(--line);
   border-radius: 20px;
   pointer-events: none;
 }
@@ -439,7 +439,7 @@ select {
   position: absolute;
   width: 13px;
   height: 13px;
-  background: #dce3ec;
+  background: var(--text);
   border-radius: 50%;
   left: 3px;
   top: 3px;
@@ -464,7 +464,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #151c27;
+  background: var(--panel);
   border-top: 1px solid var(--line);
   padding: 18px 36px;
   z-index: 2;
@@ -494,7 +494,7 @@ footer > div {
   align-items: center;
 }
 .primary:hover {
-  background: #baf8d8;
+  background: var(--accent-base);
 }
 #toast {
   position: fixed;

@@ -6,6 +6,9 @@ const os = require('node:os');
 const path = require('node:path');
 const { EventEmitter } = require('node:events');
 const C = require('../../src/shared/schedule');
+const Layout = require('../../src/shared/window-layout');
+const { createRequire } = require('node:module');
+const mainRequire = createRequire(path.resolve(__dirname, '../../src/main/index.cjs'));
 async function harness() {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'lessontimer-test-')),
     handlers = new Map(),
@@ -67,6 +70,8 @@ async function harness() {
   const app = new EventEmitter();
   app.setName = () => {};
   app.getPath = () => folder;
+  app.getVersion = () => require('../../package.json').version;
+  app.isPackaged = false;
   app.commandLine = { appendSwitch() {} };
   app.requestSingleInstanceLock = () => true;
   app.whenReady = () => Promise.resolve();
@@ -101,7 +106,7 @@ async function harness() {
   };
   const context = {
     require: (spec) =>
-      spec === 'electron' ? electron : spec === '../shared/schedule' ? C : require(spec),
+      spec === 'electron' ? electron : spec === '../shared/schedule' ? C : mainRequire(spec),
     __dirname: path.resolve(__dirname, '../../src/main'),
     process,
     console,
@@ -204,12 +209,13 @@ for (const initiallyCompact of [false, true])
         await new Promise((resolve) => setImmediate(resolve));
         const w = h.windows[1];
         const initialPosition = w.getPosition().slice();
-        assert.deepEqual(w.size, [328, initiallyCompact ? 136 : 188]);
+        assert.deepEqual(w.size, Object.values(Layout.size(initiallyCompact)));
         for (let i = 0; i < 4; i++) {
           const changed = await h.call('widget:compact');
           assert.equal(changed.ok, true);
-          assert.deepEqual(w.size, [328, changed.value.compact ? 136 : 188]);
-          assert.deepEqual(w.getPosition(), initialPosition);
+          assert.deepEqual(w.size, Object.values(Layout.size(changed.value.compact)));
+          assert.equal(w.getPosition()[1], initialPosition[1]);
+          assert.ok(w.getPosition()[0] + w.size[0] <= 1920);
           assert.equal(w.opts.resizable, false);
         }
         // The same transition must also work from the settings checkbox.
@@ -219,7 +225,7 @@ for (const initiallyCompact of [false, true])
         assert.deepEqual(w.size, [328, 188]);
         current.compact = true;
         assert.equal((await h.call('config:save', current)).ok, true);
-        assert.deepEqual(w.size, [328, 136]);
+        assert.deepEqual(w.size, Object.values(Layout.COMPACT));
       } finally {
         h.cleanup();
       }

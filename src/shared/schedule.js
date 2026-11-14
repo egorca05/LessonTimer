@@ -35,6 +35,9 @@
       compact: false,
       opacity: 100,
       customSound: null,
+      theme: 'dark',
+      accentColor: '#a1edc6',
+      checkUpdates: true,
     };
   }
   function minutes(text) {
@@ -87,6 +90,11 @@
     result.volume = Math.max(0, Math.min(100, Number(input.volume) || 0));
     result.opacity = Math.max(55, Math.min(100, Number(input.opacity) || 100));
     result.compact = Boolean(input.compact);
+    result.theme = ['dark', 'light', 'system'].includes(input.theme) ? input.theme : 'dark';
+    result.accentColor = /^#[0-9a-f]{6}$/i.test(input.accentColor || '')
+      ? input.accentColor.toLowerCase()
+      : '#a1edc6';
+    result.checkUpdates = input.checkUpdates !== false;
     // File locations are owned by the main process, never trusted from imported JSON.
     result.customSound =
       input.customSound && typeof input.customSound.name === 'string'
